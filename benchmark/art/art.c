@@ -871,7 +871,7 @@ int art_iter_prefix(art_tree *t, const unsigned char *key, int key_len, art_call
             prefix_len = prefix_mismatch(n, key, key_len, depth);
 
             // Guard if the mis-match is longer than the MAX_PREFIX_LEN
-            if (prefix_len > n->partial_len) {
+            if ((uint32_t)prefix_len > n->partial_len) {
                 prefix_len = n->partial_len;
             }
 

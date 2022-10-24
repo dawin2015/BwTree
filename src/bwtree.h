@@ -29,6 +29,7 @@
 #include <array>
 #include <atomic>
 #include <cassert>
+#include <cstdio>
 #include <chrono>
 #include <thread>
 #include <unordered_set>
@@ -191,6 +192,7 @@ extern bool print_flag;
  * class BwTreeBase - Base class of BwTree that stores some common members
  */
 class BwTreeBase {
+public:
   // This is the presumed size of cache line
   static constexpr size_t CACHE_LINE_SIZE = 64;
   
@@ -207,6 +209,7 @@ class BwTreeBase {
    * all garbage pointer to BaseNode should be represented as void *, and are
    * casted to appropriate type manually
    */
+public:
   class GarbageNode {
    public:
     // The epoch that this node is unlinked
@@ -304,14 +307,14 @@ class BwTreeBase {
   static_assert(sizeof(PaddedGCMetadata) == PaddedGCMetadata::ALIGNMENT, 
                 "class PaddedGCMetadata size does"
                 " not conform to the alignment!");
- 
- private: 
+public:
   // This is used as the garbage collection ID, and is maintained in a per
   // thread level
   // This is initialized to -1 in order to distinguish between registered 
   // threads and unregistered threads
   static thread_local int gc_id;
-  
+ 
+private: 
   // This is used to count the number of threads participating GC process
   // We use this number to initialize GC data structure
   static std::atomic<size_t> total_thread_num;
@@ -2249,7 +2252,8 @@ class BwTree : public BwTreeBase {
         }
       } else {
         const size_t diff = (uint64_t)copy_end_p - (uint64_t)copy_start_p;
-        std::memcpy(End(), copy_start_p, diff);
+        // ldr temp_fix: use void*
+        std::memcpy((void*)End(), copy_start_p, diff);
         
         end = (ElementType *)((uint64_t)end + diff);
       }
